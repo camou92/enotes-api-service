@@ -3,6 +3,7 @@ package com.camoutech.enotesapiservice.controller;
 import com.camoutech.enotesapiservice.dto.CategoryDto;
 import com.camoutech.enotesapiservice.dto.CategoryResponse;
 import com.camoutech.enotesapiservice.entity.Category;
+import com.camoutech.enotesapiservice.exception.ResourceNotFoundException;
 import com.camoutech.enotesapiservice.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -53,7 +54,7 @@ public class CategoryController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getCategoryDetailsById(@PathVariable Integer id) {
+    public ResponseEntity<?> getCategoryDetailsById(@PathVariable Integer id) throws ResourceNotFoundException {
         CategoryDto categoryDto = categoryService.getCategoryById(id);
         if (ObjectUtils.isEmpty(categoryDto)) {
             return new ResponseEntity<>("Category not found with Id=" + id, HttpStatus.NOT_FOUND);

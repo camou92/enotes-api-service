@@ -3,6 +3,7 @@ package com.camoutech.enotesapiservice.service;
 import com.camoutech.enotesapiservice.dto.CategoryDto;
 import com.camoutech.enotesapiservice.dto.CategoryResponse;
 import com.camoutech.enotesapiservice.entity.Category;
+import com.camoutech.enotesapiservice.exception.ResourceNotFoundException;
 
 import java.util.List;
 
@@ -12,7 +13,7 @@ public interface CategoryService {
     public List<CategoryResponse> getActiveCategory();
 
 
-    CategoryDto getCategoryById(Integer id);
+    CategoryDto getCategoryById(Integer id) throws ResourceNotFoundException;
 
     Boolean deleteCategory(Integer id);
 }
