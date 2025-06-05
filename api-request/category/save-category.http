@@ -4,7 +4,7 @@ Content-Type: application/json
 
 {
   "id": 1,
-  "name": "update C++",
+  "name": "",
   "description": "This is C++ Category",
   "isActive": true
 }

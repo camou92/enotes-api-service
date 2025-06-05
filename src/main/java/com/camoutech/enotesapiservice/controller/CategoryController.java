@@ -5,6 +5,7 @@ import com.camoutech.enotesapiservice.dto.CategoryResponse;
 import com.camoutech.enotesapiservice.entity.Category;
 import com.camoutech.enotesapiservice.exception.ResourceNotFoundException;
 import com.camoutech.enotesapiservice.service.CategoryService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,16 +22,17 @@ public class CategoryController {
     @Autowired
     private CategoryService categoryService;
 
-    @PostMapping("/save-category")
+    @PostMapping("/save")
     public ResponseEntity<?> saveCategory(@RequestBody CategoryDto categoryDto) {
-        Boolean saveCategory = categoryService.saveCategory(categoryDto);
 
-        if(saveCategory) {
+        Boolean saveCategory = categoryService.saveCategory(categoryDto);
+        if (saveCategory) {
             return new ResponseEntity<>("saved success", HttpStatus.CREATED);
         } else {
             return new ResponseEntity<>("not saved", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
     @GetMapping("/category")
     public ResponseEntity<?> getAllCategory() {

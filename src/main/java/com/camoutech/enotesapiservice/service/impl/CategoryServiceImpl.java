@@ -6,6 +6,7 @@ import com.camoutech.enotesapiservice.entity.Category;
 import com.camoutech.enotesapiservice.exception.ResourceNotFoundException;
 import com.camoutech.enotesapiservice.repository.CategoryRepository;
 import com.camoutech.enotesapiservice.service.CategoryService;
+import com.camoutech.enotesapiservice.util.Validation;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,9 @@ public class CategoryServiceImpl implements CategoryService {
     private CategoryRepository categoryRepository;
 
     @Autowired
+    private Validation validation;
+
+    @Autowired
     private ModelMapper mapper;
     @Override
     public Boolean saveCategory(CategoryDto categoryDto) {
@@ -29,6 +33,9 @@ public class CategoryServiceImpl implements CategoryService {
 //        category.setDescription(categoryDto.getDescription());
 //        category.setIsActive(categoryDto.getIsActive());
 
+        // Validation Checking
+        validation.categoryValidation(categoryDto);
+        
         Category category = mapper.map(categoryDto, Category.class);
 
         if (ObjectUtils.isEmpty(category.getId())) {
