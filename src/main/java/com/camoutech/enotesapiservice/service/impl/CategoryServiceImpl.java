@@ -3,6 +3,7 @@ package com.camoutech.enotesapiservice.service.impl;
 import com.camoutech.enotesapiservice.dto.CategoryDto;
 import com.camoutech.enotesapiservice.dto.CategoryResponse;
 import com.camoutech.enotesapiservice.entity.Category;
+import com.camoutech.enotesapiservice.exception.ExistDataException;
 import com.camoutech.enotesapiservice.exception.ResourceNotFoundException;
 import com.camoutech.enotesapiservice.repository.CategoryRepository;
 import com.camoutech.enotesapiservice.service.CategoryService;
@@ -35,6 +36,13 @@ public class CategoryServiceImpl implements CategoryService {
 
         // Validation Checking
         validation.categoryValidation(categoryDto);
+
+        // check category exists or not
+        Boolean exist = categoryRepository.existsByName(categoryDto.getName().trim());
+
+        if (exist) {
+            throw new ExistDataException("Category already exist");
+        }
 
         Category category = mapper.map(categoryDto, Category.class);
 
