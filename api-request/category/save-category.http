@@ -3,7 +3,7 @@ POST http://localhost:8080/api/v1/category/save
 Content-Type: application/json
 
 {
-  "name": "test",
+  "name": "",
   "description": "This is C++ Category",
   "isActive": true
 }
