@@ -1,6 +1,7 @@
 package com.camoutech.enotesapiservice.service;
 
 import com.camoutech.enotesapiservice.dto.NotesDto;
+import com.camoutech.enotesapiservice.dto.NotesResponse;
 import com.camoutech.enotesapiservice.entity.FileDetails;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -15,5 +16,5 @@ public interface NotesService {
 
     public FileDetails getFileDetails(Integer id) throws Exception;
 
-    public List<NotesDto> getAllNotesByUser(Integer userId);
+    public NotesResponse getAllNotesByUser(Integer userId, Integer pageNo, Integer pageSize);
 }

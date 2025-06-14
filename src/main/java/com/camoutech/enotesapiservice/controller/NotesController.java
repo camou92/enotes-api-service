@@ -1,6 +1,7 @@
 package com.camoutech.enotesapiservice.controller;
 
 import com.camoutech.enotesapiservice.dto.NotesDto;
+import com.camoutech.enotesapiservice.dto.NotesResponse;
 import com.camoutech.enotesapiservice.entity.FileDetails;
 import com.camoutech.enotesapiservice.exception.ResourceNotFoundException;
 import com.camoutech.enotesapiservice.service.NotesService;
@@ -57,12 +58,13 @@ public class NotesController {
     }
 
     @GetMapping("/user-notes")
-    public ResponseEntity<?> getAllNotesByUser() {
+    public ResponseEntity<?> getAllNotesByUser(@RequestParam(name = "pageNo", defaultValue = "0") Integer pageNo,
+                                               @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
         Integer userId = 2;
-        List<NotesDto> notes = notesService.getAllNotesByUser(userId);
-        if (CollectionUtils.isEmpty(notes)) {
-            return ResponseEntity.noContent().build();
-        }
+        NotesResponse notes = notesService.getAllNotesByUser(userId,pageNo,pageSize);
+//		if (CollectionUtils.isEmpty(notes)) {
+//			return ResponseEntity.noContent().build();
+//		}
         return CommonUtil.createBuildResponse(notes, HttpStatus.OK);
     }
 }
