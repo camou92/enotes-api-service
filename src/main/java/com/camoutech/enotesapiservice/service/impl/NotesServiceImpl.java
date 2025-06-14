@@ -8,40 +8,43 @@ import com.camoutech.enotesapiservice.repository.CategoryRepository;
 import com.camoutech.enotesapiservice.repository.FileRepository;
 import com.camoutech.enotesapiservice.repository.NotesRepository;
 import com.camoutech.enotesapiservice.service.NotesService;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.io.FilenameUtils;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
-import org.springframework.web.multipart.MultipartFile;
-
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.io.FilenameUtils;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StreamUtils;
+import org.springframework.web.multipart.MultipartFile;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Service
 public class NotesServiceImpl implements NotesService {
 
     @Autowired
-    private NotesRepository notesRepository;
+    private NotesRepository notesRepo;
 
     @Autowired
     private ModelMapper mapper;
 
     @Autowired
-    private CategoryRepository categoryRepository;
+    private CategoryRepository categoryRepo;
 
     @Value("${file.upload.path}")
-    private String uploadPath;
+    private String uploadpath;
 
     @Autowired
-    private FileRepository fileRepository;
+    private FileRepository fileRepo;
 
     @Override
     public Boolean saveNotes(String notes, MultipartFile file) throws Exception {
@@ -62,13 +65,12 @@ public class NotesServiceImpl implements NotesService {
             notesMap.setFileDetails(null);
         }
 
-        Notes saveNotes = notesRepository.save(notesMap);
+        Notes saveNotes = notesRepo.save(notesMap);
         if (!ObjectUtils.isEmpty(saveNotes)) {
             return true;
         }
         return false;
     }
-
 
     private FileDetails saveFileDetails(MultipartFile file) throws IOException {
 
@@ -77,7 +79,7 @@ public class NotesServiceImpl implements NotesService {
             String originalFilename = file.getOriginalFilename();
             String extension = FilenameUtils.getExtension(originalFilename);
 
-            List<String> extensionAllow = Arrays.asList("pdf", "xlsx", "jpg", "png");
+            List<String> extensionAllow = Arrays.asList("pdf", "xlsx", "jpg", "png", "docx");
             if (!extensionAllow.contains(extension)) {
                 throw new IllegalArgumentException("invalid file format ! Upload only .pdf , .xlsx,.jpg");
             }
@@ -85,12 +87,12 @@ public class NotesServiceImpl implements NotesService {
             String rndString = UUID.randomUUID().toString();
             String uploadfileName = rndString + "." + extension; // sdfsafbhkljsf.pdf
 
-            File saveFile = new File(uploadPath);
+            File saveFile = new File(uploadpath);
             if (!saveFile.exists()) {
                 saveFile.mkdir();
             }
             // path : enotesapiservice/notes/java.pdf
-            String storePath = uploadPath.concat(uploadfileName);
+            String storePath = uploadpath.concat(uploadfileName);
 
             // upload file
             long upload = Files.copy(file.getInputStream(), Paths.get(storePath));
@@ -101,7 +103,7 @@ public class NotesServiceImpl implements NotesService {
                 fileDtls.setUploadFileName(uploadfileName);
                 fileDtls.setFileSize(file.getSize());
                 fileDtls.setPath(storePath);
-                FileDetails saveFileDtls = fileRepository.save(fileDtls);
+                FileDetails saveFileDtls = fileRepo.save(fileDtls);
                 return saveFileDtls;
             }
         }
@@ -111,7 +113,7 @@ public class NotesServiceImpl implements NotesService {
 
     private String getDisplayName(String originalFilename) {
         // java_programming_tutorials.pdf
-
+        // java_prog.pdf
         String extension = FilenameUtils.getExtension(originalFilename);
         String fileName = FilenameUtils.removeExtension(originalFilename);
 
@@ -123,12 +125,26 @@ public class NotesServiceImpl implements NotesService {
     }
 
     private void checkCategoryExist(CategoryDto category) throws Exception {
-        categoryRepository.findById(category.getId()).orElseThrow(() -> new ResourceNotFoundException("category id invalid"));
+        categoryRepo.findById(category.getId()).orElseThrow(() -> new ResourceNotFoundException("category id invalid"));
     }
-
 
     @Override
     public List<NotesDto> getAllNotes() {
-        return notesRepository.findAll().stream().map(note -> mapper.map(note, NotesDto.class)).toList();
+        return notesRepo.findAll().stream().map(note -> mapper.map(note, NotesDto.class)).toList();
+    }
+
+    @Override
+    public byte[] downloadFile(FileDetails fileDetails) throws Exception {
+
+        InputStream io = new FileInputStream(fileDetails.getPath());
+
+        return StreamUtils.copyToByteArray(io);
+    }
+
+    @Override
+    public FileDetails getFileDetails(Integer id) throws Exception {
+        FileDetails fileDtls = fileRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("File is not available"));
+        return fileDtls;
     }
 }

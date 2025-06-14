@@ -30,7 +30,7 @@ public class NotesDto {
 
     private Date updatedOn;
 
-    private FilesDto filesDetails;
+    private FilesDto fileDetails;
 
     @Getter
     @Setter
@@ -50,5 +50,4 @@ public class NotesDto {
         private Integer id;
         private String name;
     }
-
 }
