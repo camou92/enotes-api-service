@@ -4,6 +4,10 @@ import com.camoutech.enotesapiservice.dto.CategoryDto;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.camoutech.enotesapiservice.dto.TodoDto;
+import com.camoutech.enotesapiservice.dto.TodoDto.StatusDto;
+import com.camoutech.enotesapiservice.enums.TodoStatus;
+import com.camoutech.enotesapiservice.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
@@ -51,4 +55,19 @@ public class Validation {
         }
 
     }
+
+    public void todoValidation(TodoDto todo) throws Exception {
+        StatusDto reqStatus = todo.getStatus();
+        Boolean statusFound = false;
+        for (TodoStatus st : TodoStatus.values()) {
+            if (st.getId().equals(reqStatus.getId())) {
+                statusFound = true;
+            }
+        }
+        if (!statusFound) {
+            throw new ResourceNotFoundException("invalid status");
+        }
+
+    }
+
 }
