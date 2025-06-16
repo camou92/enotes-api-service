@@ -23,9 +23,9 @@ public class UserDto {
 
     private String email;
 
-    private String password;
-
     private String mobNo;
+
+    private String password;
 
     private List<RoleDto> roles;
 
