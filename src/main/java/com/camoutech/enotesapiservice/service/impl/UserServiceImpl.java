@@ -1,16 +1,24 @@
 package com.camoutech.enotesapiservice.service.impl;
 
+import com.camoutech.enotesapiservice.config.security.CustomUserDetails;
 import com.camoutech.enotesapiservice.dto.EmailRequest;
+import com.camoutech.enotesapiservice.dto.LoginRequest;
+import com.camoutech.enotesapiservice.dto.LoginResponse;
 import com.camoutech.enotesapiservice.dto.UserDto;
 import com.camoutech.enotesapiservice.entity.AccountStatus;
 import com.camoutech.enotesapiservice.entity.Role;
 import com.camoutech.enotesapiservice.entity.User;
 import com.camoutech.enotesapiservice.repository.RoleRepository;
 import com.camoutech.enotesapiservice.repository.UserRepository;
+import com.camoutech.enotesapiservice.service.JwtService;
 import com.camoutech.enotesapiservice.service.UserService;
 import com.camoutech.enotesapiservice.util.Validation;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -33,7 +41,16 @@ public class UserServiceImpl implements UserService {
     private ModelMapper mapper;
 
     @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
+
+    @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private JwtService jwtService;
 
     @Override
     public Boolean register(UserDto userDto, String url) throws Exception {
@@ -43,11 +60,10 @@ public class UserServiceImpl implements UserService {
 
         setRole(userDto, user);
 
-        AccountStatus status = AccountStatus.builder()
-                .isActive(false)
-                .verificationCode(UUID.randomUUID().toString())
+        AccountStatus status = AccountStatus.builder().isActive(false).verificationCode(UUID.randomUUID().toString())
                 .build();
         user.setStatus(status);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         User saveUser = userRepo.save(user);
         if (!ObjectUtils.isEmpty(saveUser)) {
             // send email
@@ -56,6 +72,8 @@ public class UserServiceImpl implements UserService {
         }
         return false;
     }
+
+
 
     private void emailSend(User saveUser, String url) throws Exception {
 
@@ -82,4 +100,29 @@ public class UserServiceImpl implements UserService {
         List<Role> roles = roleRepo.findAllById(reqRoleId);
         user.setRoles(roles);
     }
+
+    @Override
+    public LoginResponse login(LoginRequest loginRequest) {
+
+        Authentication authenticate = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+
+        if(authenticate.isAuthenticated())
+        {
+            CustomUserDetails customUserDetails=
+                    (CustomUserDetails)authenticate.getPrincipal();
+
+            String token=jwtService.generateToken(customUserDetails.getUser());
+
+            LoginResponse loginResponse=LoginResponse.builder()
+                    .user(mapper.map(customUserDetails.getUser(), UserDto.class))
+                    .token(token)
+                    .build();
+            return loginResponse;
+        }
+
+        return null;
+    }
+
 }
+

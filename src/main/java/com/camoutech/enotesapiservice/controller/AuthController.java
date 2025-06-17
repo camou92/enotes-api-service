@@ -1,5 +1,7 @@
 package com.camoutech.enotesapiservice.controller;
 
+import com.camoutech.enotesapiservice.dto.LoginRequest;
+import com.camoutech.enotesapiservice.dto.LoginResponse;
 import com.camoutech.enotesapiservice.dto.UserDto;
 import com.camoutech.enotesapiservice.service.UserService;
 import com.camoutech.enotesapiservice.util.CommonUtil;
@@ -7,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,11 +24,22 @@ public class AuthController {
 
     @PostMapping("/")
     public ResponseEntity<?> registerUser(@RequestBody UserDto userDto, HttpServletRequest request) throws Exception {
-        String url=CommonUtil.getUrl(request);
-        Boolean register = userService.register(userDto,url);
+        String url = CommonUtil.getUrl(request);
+        Boolean register = userService.register(userDto, url);
         if (register) {
             return CommonUtil.createBuildResponseMessage("Register success", HttpStatus.CREATED);
         }
         return CommonUtil.createErrorResponseMessage("Register failed", HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) throws Exception {
+
+        LoginResponse loginResponse = userService.login(loginRequest);
+        if (ObjectUtils.isEmpty(loginResponse)) {
+            return CommonUtil.createErrorResponseMessage("invalid credential", HttpStatus.BAD_REQUEST);
+        }
+        return CommonUtil.createBuildResponse(loginResponse,HttpStatus.OK);
+    }
+
 }
