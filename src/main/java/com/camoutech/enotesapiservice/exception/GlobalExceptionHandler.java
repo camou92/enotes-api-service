@@ -2,6 +2,7 @@ package com.camoutech.enotesapiservice.exception;
 
 import com.camoutech.enotesapiservice.util.CommonUtil;
 import com.camoutech.enotesapiservice.util.ValidationException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 @ControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler{
 
   @ExceptionHandler(NullPointerException.class)
@@ -54,6 +56,12 @@ public class GlobalExceptionHandler{
   public ResponseEntity<?> handleExistDataException(ExistDataException e) {
     //return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
     return CommonUtil.createErrorResponseMessage(e.getMessage(), HttpStatus.CONFLICT);
+  }
+
+  @ExceptionHandler(SuccessException.class)
+  public ResponseEntity<?> handleSuccessException(SuccessException e) {
+    log.error("GlobalExceptionHandler :: handleException ::", e.getMessage());
+    return CommonUtil.createBuildResponseMessage(e.getMessage(), HttpStatus.OK);
   }
 
   @ExceptionHandler(HttpMessageNotReadableException.class)
